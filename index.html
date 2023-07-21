@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .grid-fluid{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+ 
+        }
+        .loader{
+            display: block;
+            margin: auto;
+
+        }
+
+    </style>
+</head>
+<body>
+    <h1> Escriba el Numero de Pedido</h1>
+    <input type="search" id="search" placeholder="Buscar Pedido ..">
+    <section id="shows" class="grid-fluid"></section>
+    <template id="show-template">
+        <article class="show">
+            <h3></h3>
+            <div></div>
+            <img>
+            <a></a>
+        </article>
+    </template>
+
+    <script>
+        const d= document,
+        $shows = d.getElementById("shows"),
+        $template = d.getElementById("show-template").content,
+        $fragment = d.createDocumentFragment();
+
+    d.addEventListener("keypress", async e=> {
+        if(e.target.matches("#search"))
+        //console.log(e.key, e.keyCode)
+        if(e.key ==="Enter"){
+            try{
+                $shows.innerHTML = `<img class="loader" src=../assets/loader-svg"
+                alt="Cargando..">`;
+
+                let query = e.target.value.toString(),
+                
+                    api = `https://api.airtable.com/v0/appBu6mELPLydy9lZ/VENTAS/${query}?api_key=keyrpNLygXZW27LoW`,
+                    res = await fetch(api),
+                    json = await res.json();
+                  console.log(api,res,json);
+
+             if(!res.ok) throw {status:res.status,statusText:res.statusText}
+             let a={status:res.status}
+             if(a=404){
+                console.log({status:res.status});
+             }else{
+            json.forEach(el=>{
+                $template.querySelector("h3").textContent =el.fields.ESTADO-DEL-PRODUCTO;
+                let $clone = d.importNode($template, true);
+                $fragment.appendChild($clone);
+            });
+            $shows.appendChild($fragment);
+            }
+
+             
+             
+            }catch(err){
+                let q = e.target.value.toString();
+                console.log(err);
+                let message = err.statusText ||`N Pedido: <mark>${q}</mark>: NO ENCONTRADO`;
+                $shows.innerHTML = `<p>${message}</p>`;
+
+           
+
+            }
+        }
+
+    })
+
+
+    </script>
+
+
+</body>
+</html>
